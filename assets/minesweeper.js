@@ -1,11 +1,12 @@
-//dec//declare or constants here
+//declare or constants here
 const EMPTY_CELL = "";
 
 $().ready(function() {
 		//so somthing here
-    var newGame = Object.create(mineFieldPrototype);
+    var newGame = Object.create(newGamePrototype);
     newGame.init();
-    newGame.printBoard();
+    newGame.playGame();
+    //newGame.printBoard();
     //newGame.startGame();
 });
 
@@ -49,6 +50,11 @@ var mineFieldPrototype = {
 
    },
 
+   cellFind: function(row,col) {
+   			index = row*9+col;
+   			return $(".cell")[index];
+   },
+
    cellsAroundCell: function(cell) {
    				var cells = [];
           var row= cell.row-1;
@@ -71,6 +77,19 @@ var mineFieldPrototype = {
         }
 
    },
+
+   /*checkWin: function() {
+   			var boardy = this.board;
+   			var merged = [].concat.apply([], boardy);
+        //var hey = merged.filter(function(n) { return n.getSymbol() != "b"});
+        //hey.forEach(function(n) {console.log(n.checked)})
+        /*if (hey.every(function(n) { return n.checked === 1; });) {
+        		return true;
+        }
+        else {return false};
+        //console.log("hey");
+   }, */
+
    populateTouchingMines: function() {
    			that = this;
    			this.board.forEach(function(rowN) {
@@ -137,11 +156,99 @@ var cellPrototype = {
     			this.symbol = EMPTY_CELL;
           this.row = row+1;
           this.col = col+1;
+          this.checked = 0;
+    },
+    checkedCell: function(value) {
+    			this.checked = value;
     },
     getSymbol: function() {
     			return this.symbol;
     },
     setSymbol: function(symbol) {
     			this.symbol = symbol;
+    },
+    setFlag: function() {
+    			this.flag = "f";
+    },
+    checked?: function() {
+    			if(this.checked === 1) {
+          		return true;
+          }
+          return false;
     }
+
+};
+
+var newGamePrototype = {
+		init: function(){
+    			this.board = Object.create(mineFieldPrototype);
+          this.board.init();
+    			//list all functions needed to commense from field
+    },
+    playGame: function() {
+    		var row,col,symbol;
+        that = this;
+    			//hover effect and assigning symbol, col, row on hover
+         $('.cell').hover(function(event){
+                    row = $(event.target).closest('.row').index('.row');
+                    col = ($(event.target).closest('.cell').index('.cell'))-(row*9);
+                    symbol = that.board.board[row][col].getSymbol();
+                    //console.log(row,col,symbol);
+                    $(this).toggleClass( "active" )
+    		});
+
+        $('.cell').mousedown(function(event) {
+    								switch (event.which) {
+        								case 1:
+            								//alert('Left Mouse button pressed.');
+                            if(symbol === "b") {
+
+                                that.board.printBoard();
+                                $('#board').unbind('click');
+          											$('.cell').unbind('mouseenter mouseleave');
+
+                                }
+                            else if ($.isNumeric(symbol)) {
+                            		that.checkCell(row,col,$(this));
+                                //that.board.checkWin();
+	                           		}
+                            else {
+                            		that.checkCell(row,col,$(this));
+                            }
+           									break;
+        								case 3:
+                            that.board.board[row][col].setFlag();
+                            $(this).html("f");
+           									break;
+    								}
+				});
+
+    },
+
+    checkCell: function(row,col,obj) {
+    		that = this;
+    		cell = this.board.board[row][col];
+    		cell.checkedCell(1);
+        obj.html(cell.getSymbol());
+        obj.css({"background-color": "#b9c5f0"});
+        if (cell.getSymbol() === EMPTY_CELL) {
+        		var around_cells = that.board.cellsAroundCell(cell);
+            /*console.log(around_cells);
+            row = around_cells[0][0];
+            col = around_cells[0][1];
+            cellV = that.board.cellFind(row,col);
+            $(cellV).html("her");*/
+            around_cells.forEach(function(obj) {
+            			var row = obj[0];
+                  var col = obj[1];
+                  cellboard = that.board.board[row][col];
+                  cellboard.checkedCell(1);
+                  cellV = that.board.cellFind(row,col);
+                  symbol = cellboard.getSymbol();
+                  $(cellV).html(symbol);
+                  $(cellV).css({"background-color": "#b9c5f0"});
+            });
+        };
+    }
+
 };
