@@ -45,7 +45,6 @@ var mineFieldPrototype = {
                   col = Math.floor(ind-(row*9));
                   symbol = that.board[row][col].getSymbol();
                       if (symbol === "b") {
-                                  $(this).html("url");
                                   $(this).addClass("bombcell");
                           }
                       else {
