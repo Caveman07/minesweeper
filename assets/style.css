@@ -64,4 +64,5 @@ body {
 }
 .bombcell {
   background-color: red;
+  background-image: url("assets/orange-bomb-16.png");
 }
