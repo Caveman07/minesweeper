@@ -1,24 +1,23 @@
-//declare or constants here
+//declare constants here
 const EMPTY_CELL = "";
 
 $().ready(function() {
-		//so somthing here
+		//initiate game
     var newGame = Object.create(newGamePrototype);
     newGame.init();
     newGame.playGame();
 });
 
+//mineField
 var mineFieldPrototype = {
-		//declare all variables
+
 
     init: function() {
     			this.board = this.createNewField();
           this.grid = this.createGrid(this.board);
-          //console.log("hey");
           this.populateBoardWithMines();
           this.populateTouchingMines();
-          console.log(this.allCellsWithBomb());
-          //this.printBoard();
+          //console.log(this.allCellsWithBomb());
     },
 
     createNewField: function() {
@@ -40,20 +39,29 @@ var mineFieldPrototype = {
 
    printBoard: function() {
 
-        that = this;
-   			$(".cell").each(function(ind,obj) {
-        				row = Math.floor(ind/9);
-                col = Math.floor(ind-(row*9));
-        				$(this).text(that.board[row][col].getSymbol());
-                });
+          that = this;
+     			$(".cell").each(function(ind,obj) {
+          				row = Math.floor(ind/9);
+                  col = Math.floor(ind-(row*9));
+                  symbol = that.board[row][col].getSymbol();
+                      if (symbol === "b") {
+                                  $(this).html("url");
+                                  $(this).addClass("bombcell");
+                          }
+                      else {
+                      $(this).html(symbol)
+                      };
 
-   },
+                  });
 
+    },
+   //finds the .cell object on the board
    cellFind: function(row,col) {
    			index = row*9+col;
    			return $(".cell")[index];
    },
 
+   //finds all surrounding cells
    cellsAroundCell: function(cell) {
    				var cells = [];
           var row= cell.row-1;
@@ -69,7 +77,7 @@ var mineFieldPrototype = {
           return filtered;
 
    },
-
+   //populates board with 10 mines on random places
    populateBoardWithMines: function() {
    			for (var i = 0; i < 10; i++) {
         		this.randomFreeCell().setSymbol("b");
@@ -77,6 +85,7 @@ var mineFieldPrototype = {
 
    },
 
+   //returns all object cells that has a bomb
    allCellsWithBomb: function() {
    			var boardy = this.board;
    			var merged = [].concat.apply([], boardy);
@@ -205,15 +214,14 @@ var newGamePrototype = {
                     row = $(event.target).closest('.row').index('.row');
                     col = ($(event.target).closest('.cell').index('.cell'))-(row*9);
                     symbol = that.board.board[row][col].getSymbol();
-                    //console.log(row,col,symbol);
                     $(this).toggleClass( "active" )
     		});
 
        	//action on mouseclick
         $('.cell').mousedown(function(event) {
     								switch (event.which) {
+                        //case left click
         								case 1:
-            								//alert('Left Mouse button pressed.');
                             if(symbol === "b") {
 																that.timer.checkTime();
                                 that.board.printBoard();
@@ -241,6 +249,8 @@ var newGamePrototype = {
                                       }
                             }
            									break;
+
+                        //case right click put flag
         								case 3:
                             that.board.board[row][col].setFlag();
                             $(this).html("f");
@@ -253,9 +263,9 @@ var newGamePrototype = {
     checkCell: function(row,col,obj) {
     		that = this;
     		cell = this.board.board[row][col];
-    		cell.checkedCell(1);
+        cell.checkedCell(1);
         obj.html(cell.getSymbol());
-        obj.css({"background-color": "#b9c5f0"});
+        obj.addClass('openedcell');
         if (cell.getSymbol() === EMPTY_CELL) {
         		var around_cells = that.board.cellsAroundCell(cell);
 
@@ -267,7 +277,7 @@ var newGamePrototype = {
                   cellV = that.board.cellFind(row,col);
                   symbol = cellboard.getSymbol();
                   $(cellV).html(symbol);
-                  $(cellV).css({"background-color": "#b9c5f0"});
+                  $(cellV).addClass('openedcell');
             });
         };
     }
@@ -275,21 +285,18 @@ var newGamePrototype = {
 };
 
 var timerPrototype = {
+
     init: function() {
         this.startTime = (new Date()).getTime();
-        console.log(this.startTime);
         return this;
     },
+
     checkTime: function() {
-        // returns time difference (in seconds: getSeconds()) between start time and time that this function was called
         var difference = (new Date()).getTime();
         var hey = difference - this.startTime;
   			var minutes = Math.floor(hey / 60000); //
 				var seconds = Math.round((hey % 60000)/1000);
-        //difference.setTime((new Date().getTime()) - this.startTime);
-        //console.log(difference.getSeconds());
         var timerArray = [minutes,seconds];
         return timerArray;
-
     }
 };
