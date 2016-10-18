@@ -6,8 +6,6 @@ $().ready(function() {
     var newGame = Object.create(newGamePrototype);
     newGame.init();
     newGame.playGame();
-    //newGame.printBoard();
-    //newGame.startGame();
 });
 
 var mineFieldPrototype = {
@@ -16,8 +14,10 @@ var mineFieldPrototype = {
     init: function() {
     			this.board = this.createNewField();
           this.grid = this.createGrid(this.board);
+          //console.log("hey");
           this.populateBoardWithMines();
           this.populateTouchingMines();
+          console.log(this.allCellsWithBomb());
           //this.printBoard();
     },
 
@@ -78,17 +78,20 @@ var mineFieldPrototype = {
 
    },
 
-   /*checkWin: function() {
+   allCellsWithBomb: function() {
    			var boardy = this.board;
    			var merged = [].concat.apply([], boardy);
-        //var hey = merged.filter(function(n) { return n.getSymbol() != "b"});
-        //hey.forEach(function(n) {console.log(n.checked)})
-        /*if (hey.every(function(n) { return n.checked === 1; });) {
-        		return true;
-        }
-        else {return false};
-        //console.log("hey");
-   }, */
+        var huy = merged.filter(function(n) { return n.getSymbol() === "b"});
+        return huy;
+   },
+
+   checkWin: function() {
+   			var boardy = this.board;
+   			var merged = [].concat.apply([], boardy);
+        hey = merged.filter(function(n) { return n.getSymbol() != "b"});
+        state = hey.every(function(n) { return n.checked === 1 });
+        return state;
+   },
 
    populateTouchingMines: function() {
    			that = this;
@@ -170,7 +173,8 @@ var cellPrototype = {
     setFlag: function() {
     			this.flag = "f";
     },
-    checked?: function() {
+    //returns true if the cell is checked
+    checkedQ: function() {
     			if(this.checked === 1) {
           		return true;
           }
@@ -208,12 +212,17 @@ var newGamePrototype = {
           											$('.cell').unbind('mouseenter mouseleave');
 
                                 }
-                            else if ($.isNumeric(symbol)) {
-                            		that.checkCell(row,col,$(this));
-                                //that.board.checkWin();
-	                           		}
                             else {
                             		that.checkCell(row,col,$(this));
+                                state =  that.board.checkWin();
+                                console.log(state);
+   																		if (state) {
+                                      		that.board.printBoard();
+                                      		$('#board').unbind('click');
+          																$('.cell').unbind('mouseenter mouseleave');
+                                          $('body').append("<div class='overlay'></div>");
+                                          $(".overlay").append("<h1>You have won</h1>");
+                                      }
                             }
            									break;
         								case 3:
