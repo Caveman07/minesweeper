@@ -44,7 +44,6 @@ var mineFieldPrototype = {
    			$(".cell").each(function(ind,obj) {
         				row = Math.floor(ind/9);
                 col = Math.floor(ind-(row*9));
-                console.log(row,col);
         				$(this).text(that.board[row][col].getSymbol());
                 });
 
@@ -187,12 +186,21 @@ var newGamePrototype = {
 		init: function(){
     			this.board = Object.create(mineFieldPrototype);
           this.board.init();
-    			//list all functions needed to commense from field
+     			this.timer = Object.create(timerPrototype);
+          this.timer.init();
     },
     playGame: function() {
-    		var row,col,symbol;
-        that = this;
-    			//hover effect and assigning symbol, col, row on hover
+    		 var row,col,symbol;
+         that = this;
+
+         //timer function
+         (function checkingTime(){
+          		var secs = that.timer.checkTime();
+              $("#timerclock").html(""+secs[0]+":"+secs[1]+"");
+          		setTimeout(checkingTime, 1000)
+         })();
+
+    		 //hover effect and assigning symbol, col, row on hover
          $('.cell').hover(function(event){
                     row = $(event.target).closest('.row').index('.row');
                     col = ($(event.target).closest('.cell').index('.cell'))-(row*9);
@@ -201,27 +209,35 @@ var newGamePrototype = {
                     $(this).toggleClass( "active" )
     		});
 
+       	//action on mouseclick
         $('.cell').mousedown(function(event) {
     								switch (event.which) {
         								case 1:
             								//alert('Left Mouse button pressed.');
                             if(symbol === "b") {
-
+																that.timer.checkTime();
                                 that.board.printBoard();
                                 $('#board').unbind('click');
           											$('.cell').unbind('mouseenter mouseleave');
+                                $('body').append("<div class='overlay'></div>");
+                                $(".overlay").append("<h1>You have lost</h1>");
+                                $('.overlay').append('<p><a href="">Play Again?</a></p>');
 
                                 }
                             else {
                             		that.checkCell(row,col,$(this));
                                 state =  that.board.checkWin();
-                                console.log(state);
+                                //console.log(state);
    																		if (state) {
+                                      		var secs = that.timer.checkTime();
                                       		that.board.printBoard();
                                       		$('#board').unbind('click');
           																$('.cell').unbind('mouseenter mouseleave');
                                           $('body').append("<div class='overlay'></div>");
                                           $(".overlay").append("<h1>You have won</h1>");
+                                          $(".overlay").append("<p>Your time is <span id='shit'></span></p>");
+                                          $("#shit").html(""+secs[0]+":"+secs[1]+"");
+                                          $('.overlay').append('<p><a href="">Play Again?</a></p>');
                                       }
                             }
            									break;
@@ -242,11 +258,7 @@ var newGamePrototype = {
         obj.css({"background-color": "#b9c5f0"});
         if (cell.getSymbol() === EMPTY_CELL) {
         		var around_cells = that.board.cellsAroundCell(cell);
-            /*console.log(around_cells);
-            row = around_cells[0][0];
-            col = around_cells[0][1];
-            cellV = that.board.cellFind(row,col);
-            $(cellV).html("her");*/
+
             around_cells.forEach(function(obj) {
             			var row = obj[0];
                   var col = obj[1];
@@ -260,4 +272,24 @@ var newGamePrototype = {
         };
     }
 
+};
+
+var timerPrototype = {
+    init: function() {
+        this.startTime = (new Date()).getTime();
+        console.log(this.startTime);
+        return this;
+    },
+    checkTime: function() {
+        // returns time difference (in seconds: getSeconds()) between start time and time that this function was called
+        var difference = (new Date()).getTime();
+        var hey = difference - this.startTime;
+  			var minutes = Math.floor(hey / 60000); //
+				var seconds = Math.round((hey % 60000)/1000);
+        //difference.setTime((new Date().getTime()) - this.startTime);
+        //console.log(difference.getSeconds());
+        var timerArray = [minutes,seconds];
+        return timerArray;
+
+    }
 };
